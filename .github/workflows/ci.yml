@@ -11,6 +11,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Require complete content tree
+        run: |
+          test -d skills && ls skills/*/SKILL.md >/dev/null
+          test -d agents && ls agents/*.md >/dev/null
+          test -f scripts/sync-hermes.sh
+          test -f .claude-plugin/plugin.json && test -f .claude-plugin/marketplace.json
+          test -f README.md && test -f LICENSE
+
       - name: Validate JSON manifests
         run: |
           jq . .claude-plugin/plugin.json > /dev/null

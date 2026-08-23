@@ -98,6 +98,5 @@ one per line:
 ISSUE-SUGGESTION: <imperative title> — <root cause / evidence / why it matters>
 ```
 
-Hermes triages every suggestion (right-way / zero-debt / root-cause /
-fits-the-vision) and stages accepted ones as real tasks. Suggest freely;
-Hermes filters. Never create issues yourself.
+The human/orchestrator triages every suggestion (right-way / zero-debt / root-cause /
+fits-the-vision) and stages accepted ones as real tasks. Suggest freely; they filter. Never create issues yourself.

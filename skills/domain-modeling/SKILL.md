@@ -1,35 +1,74 @@
 ---
 name: domain-modeling
-description: Actively build and sharpen a project's domain model — challenge terms, sharpen fuzzy language, stress-test with scenarios, and write the glossary/decisions down as they crystallise. Use at greenfield/bootstrap before code is written, and when discussing codebase terminology or recording a decision.
+description: Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording or editing an ADR.
 ---
 
 # Domain Modeling
 
-> Adapted from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT).
-> **ScaleBridge adaptation — outputs align to OUR conventions (do not import Matt's file formats):**
-> - **Glossary** lives in a dedicated `## Glossary` section of the relevant `CONTEXT.md`, or a `docs/GLOSSARY.md` — it does NOT replace our per-directory `CONTEXT.md` (which is spec/status, not a pure glossary). Keep the glossary free of implementation detail.
-> - **ADRs** go in `docs/ADR/` using OUR numbered, immutable format (next number per `.claude/rules/context-sync.md`). ADR decisions are immutable — a change of mind is a NEW ADR, never an edit.
-> - **Highest-value moment: greenfield / bootstrap.** Run this before the first feature of a fresh repo to establish the vocabulary and interfaces up front (e.g. a RAG repo: chunk / contextualized chunk / embedding / dense vs sparse retrieval / RRF fusion / rerank / ingest vs query). This is an orchestrator/bootstrap activity (local Claude Code or Hermes), not the per-issue stateless implementer's job.
-> - This is the ACTIVE discipline (changing the model). Merely *reading* CONTEXT.md for vocabulary is a one-line habit any skill does — not this skill.
+Actively build and sharpen the project's domain model as you design. This is the *active* discipline: challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise. (Merely *reading* `CONTEXT.md` for vocabulary is not this skill: that's a one-line habit any skill can do. This skill is for when you're changing the model, not just consuming it.)
 
-Actively build and sharpen the project's domain model as you design: challenge terms, invent edge-case scenarios, and write the glossary and decisions down the moment they crystallise. Create files lazily — only when you have something to write.
+## File structure
+
+Most repos have a single context:
+
+```
+/
+├── CONTEXT.md
+├── docs/
+│   └── adr/
+│       ├── 0001-event-sourced-orders.md
+│       └── 0002-postgres-for-write-model.md
+└── src/
+```
+
+If a `CONTEXT-MAP.md` exists at the root, the repo has multiple contexts. The map points to where each one lives:
+
+```
+/
+├── CONTEXT-MAP.md
+├── docs/
+│   └── adr/                          ← system-wide decisions
+├── src/
+│   ├── ordering/
+│   │   ├── CONTEXT.md
+│   │   └── docs/adr/                 ← context-specific decisions
+│   └── billing/
+│       ├── CONTEXT.md
+│       └── docs/adr/
+```
+
+Create files lazily: only when you have something to write. If no `CONTEXT.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
 
 ## During the session
 
 ### Challenge against the glossary
-When a term conflicts with the existing language, call it out immediately. "The glossary defines 'cancellation' as X, but you seem to mean Y. Which is it?"
+
+When the user uses a term that conflicts with the existing language in `CONTEXT.md`, call it out immediately. "Your glossary defines 'cancellation' as X, but you seem to mean Y. Which is it?"
 
 ### Sharpen fuzzy language
-When a term is vague or overloaded, propose a precise canonical term. "You're saying 'account' — do you mean the Customer or the User? Those are different things."
+
+When the user uses vague or overloaded terms, propose a precise canonical term. "You're saying 'account': do you mean the Customer or the User? Those are different things."
 
 ### Discuss concrete scenarios
-Stress-test domain relationships with specific scenarios that probe edge cases and force precision about the boundaries between concepts.
+
+When domain relationships are being discussed, stress-test them with specific scenarios. Invent scenarios that probe edge cases and force the user to be precise about the boundaries between concepts.
 
 ### Cross-reference with code
-When someone states how something works, check whether the code agrees; surface contradictions. "Your code cancels entire Orders, but you just said partial cancellation is possible — which is right?"
 
-### Capture inline
-When a term is resolved, write it to the glossary right then (don't batch). Keep the glossary a glossary — no implementation details, no spec, no scratchpad.
+When the user states how something works, check whether the code agrees. If you find a contradiction, surface it: "Your code cancels entire Orders, but you just said partial cancellation is possible. Which is right?"
+
+### Update CONTEXT.md inline
+
+When a term is resolved, update `CONTEXT.md` right there. Don't batch these up: capture them as they happen. Use the format in [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
+
+`CONTEXT.md` should be totally devoid of implementation details. Do not treat `CONTEXT.md` as a spec, a scratch pad, or a repository for implementation decisions. It is a glossary and nothing else.
 
 ### Offer ADRs sparingly
-Only offer an ADR when ALL three hold: (1) hard to reverse, (2) surprising without context, (3) the result of a real trade-off with genuine alternatives. If any is missing, skip it. Use our `docs/ADR/` numbered immutable format.
+
+Only offer to create an ADR when all three are true:
+
+1. **Hard to reverse**: the cost of changing your mind later is meaningful
+2. **Surprising without context**: a future reader will wonder "why did they do it this way?"
+3. **The result of a real trade-off**: there were genuine alternatives and you picked one for specific reasons
+
+If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](./ADR-FORMAT.md).
