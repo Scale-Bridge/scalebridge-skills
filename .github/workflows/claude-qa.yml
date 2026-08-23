@@ -95,7 +95,8 @@ jobs:
           retention-days: 7
       - name: Leg status
         if: ${{ !cancelled() }}
-        run: grep -q '^VERDICT: PASS$' "out/verdict-${{ strategy.job-index }}.md"
+        run: |
+          grep -q '^VERDICT: PASS$' "out/verdict-${{ strategy.job-index }}.md"
 
   qa:
     needs: [plan, qa-leg]
