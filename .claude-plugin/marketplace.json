@@ -1,5 +1,6 @@
 {
   "name": "scalebridge",
+  "description": "ScaleBridge shared engineering skills and agents — the single source for cross-repo skills.",
   "owner": { "name": "ScaleBridge" },
   "plugins": [
     {
