@@ -1,0 +1,22 @@
+# Factory scaffold .gitignore.
+# Keep generated tool artifacts and local source material out of the public repo.
+node_modules/
+.stryker-tmp/
+stryker.log
+reports/
+coverage/
+.nyc_output/
+*.log
+out/
+dist/
+build/
+.hypothesis/
+.DS_Store
+
+# Local-only inputs.
+*.epub
+*.pdf
+*.mobi
+*.azw3
+books/
+RagBooks/
