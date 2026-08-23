@@ -1,0 +1,75 @@
+name: Claude Architect
+on:
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: architect-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  architect:
+    if: >-
+      startsWith(github.event.comment.body, 'ARCHITECT-QUESTION:') &&
+      (github.actor == 'jimmyaah' || github.actor == 'claude[bot]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Question cap
+        id: cap
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          N=$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments --jq '[.comments[].body | select(startswith("ARCHITECT-QUESTION:"))] | length')
+          if [ "$N" -gt 3 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "ARCHITECT CAP REACHED ($N questions) — this task needs human design input or a re-scope."
+          fi
+
+      - name: Mark run start
+        id: t0
+        run: echo "iso=$(date -u +%FT%TZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Run architect
+        if: steps.cap.outputs.skip != 'true'
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISABLE_AUTO_COMPACT: "1"
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: "claude[bot],claude"
+          prompt: >-
+            ${{ format('You are the principal architect for this repository. Read issue #{0} with all comments, CLAUDE.md, CONTEXT.md, relevant files, and branch issue-{0}. Answer only the latest unanswered ARCHITECT-QUESTION with a concrete decision, rationale, tradeoffs, and exact next steps. Optimize for the right way, zero debt, root cause, security, and the repository purpose. Post one issue comment starting exactly `ARCHITECT-ANSWER:`. Do not change files.', github.event.issue.number) }}
+          claude_args: |
+            --model claude-fable-5
+            --effort max
+            --max-turns 30
+            --allowedTools "Skill,Read,Glob,Grep,Bash(git log:*),Bash(git diff:*),Bash(git show:*),Bash(gh issue view:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh issue comment:*)"
+
+      - name: Verify answer and resume
+        if: steps.cap.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+          T0: ${{ steps.t0.outputs.iso }}
+        run: |
+          ANS=$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments --jq '[.comments[] | select(.body | startswith("ARCHITECT-ANSWER:"))] | last | .createdAt // ""')
+          if [ -z "$ANS" ] || [[ ! "$ANS" > "$T0" ]]; then
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Architect run produced no answer (fail-closed)."
+            exit 1
+          fi
+          IS_PR=$(gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" --jq 'has("pull_request")')
+          if [ "$IS_PR" = "false" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/dispatches" -f event_type=relay -F "client_payload[issue]=$ISSUE" -F "client_payload[label]=claude"
+          fi
