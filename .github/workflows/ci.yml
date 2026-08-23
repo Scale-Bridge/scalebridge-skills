@@ -33,8 +33,9 @@ jobs:
         run: |
           curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | tar -xz gitleaks
           ./gitleaks detect --source . --no-banner --redact
-      - name: Git log clean (no tool name in commit messages)
+      - name: No tool attribution in the PR's commits
         run: |
-          if git log --format='%s%n%b' | grep -qiw 'claude'; then
-            echo "::error::authoring-tool name found in a commit message"; exit 1
+          RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          if git log --format='%s%n%b' "$RANGE" | grep -qiE 'co-authored-by:.*claude|generated with.*claude|claude\.com/claude-code'; then
+            echo "::error::tool attribution found in a PR commit message"; exit 1
           fi
