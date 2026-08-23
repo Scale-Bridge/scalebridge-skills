@@ -1,0 +1,116 @@
+name: Claude Code
+on:
+  issues:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+  repository_dispatch:
+    types: [relay]
+
+concurrency:
+  group: claude-${{ github.event.issue.number || github.event.client_payload.issue }}
+  cancel-in-progress: false
+
+env:
+  RELAY_CAP: "5"
+
+jobs:
+  claude:
+    if: |
+      (github.event_name == 'issues' && github.actor == 'jimmyaah' && (github.event.label.name == 'claude' || github.event.label.name == 'claude-deep')) ||
+      (github.event_name == 'repository_dispatch' && contains(fromJSON('["claude","claude-deep"]'), github.event.client_payload.label)) ||
+      (github.event_name == 'issue_comment' && github.actor == 'jimmyaah' && contains(github.event.comment.body, '@claude'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Mark run start
+        id: t0
+        env:
+          ISSUE: ${{ github.event.issue.number || github.event.client_payload.issue }}
+        run: |
+          echo "iso=$(date -u +%FT%TZ)" >> "$GITHUB_OUTPUT"
+          SHA=$(git ls-remote origin "refs/heads/issue-$ISSUE" | cut -f1); [ -z "$SHA" ] && SHA=none
+          echo "startsha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISABLE_AUTO_COMPACT: "1"
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: "github-actions[bot],github-actions"
+          prompt: >-
+            ${{ github.event_name != 'issue_comment' && format('Work GitHub issue #{0}. Read it with `gh issue view {0} --comments`, then read CLAUDE.md, CONTEXT.md, `.claude/skills/implement/SKILL.md`, `.claude/skills/bulletproof/SKILL.md`, and PROGRESS.md if present. Work only on branch issue-{0}. Commit and push after every completed unit. Keep PROGRESS.md current. If context runs short, push all work, post a comment beginning exactly `CONTINUE-RELAY:` with precise state, and stop. If blocked on a real design decision, push all work, post `ARCHITECT-QUESTION:` with options and constraints, and stop. To finish, run every applicable CLAUDE.md verification command in the foreground, invoke the bulletproof skill, and open or update a pull request that closes issue #{0}. The PR body must contain `## Verified before building`, `## Bulletproof check`, and `## Issue suggestions`. PUBLIC-HISTORY RULE: commit messages, commit trailers, and the pull request body must contain zero case-insensitive occurrences of the string `claude`; README and documentation prose may name Claude Code where the issue requires it. Never push main. Never modify `.github/workflows/**` or `.claude/**`. Keep the diff exactly in scope.', github.event.issue.number || github.event.client_payload.issue) || '' }}
+          claude_args: |
+            --model ${{ (github.event.label.name == 'claude-deep' || github.event.client_payload.label == 'claude-deep') && 'claude-fable-5' || 'claude-sonnet-5' }}
+            --effort ${{ (github.event.label.name == 'claude-deep' || github.event.client_payload.label == 'claude-deep') && 'max' || 'high' }}
+            --max-turns 120
+            --allowedTools "Skill,Edit,Write,Read,Glob,Grep,WebSearch,WebFetch,Bash(git add:*),Bash(git commit:*),Bash(git checkout:*),Bash(git switch:*),Bash(git branch:*),Bash(git fetch:*),Bash(git pull:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(git rev-parse:*),Bash(git remote:*),Bash(git ls-files:*),Bash(git ls-remote:*),Bash(git rm:*),Bash(git reset:*),Bash(git restore:*),Bash(git clean:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh pr create:*),Bash(gh pr ready:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr list:*),Bash(gh pr edit:*),Bash(gh pr comment:*),Bash(gh pr status:*),Bash(curl:*),Bash(claude:*),Bash(shellcheck:*),Bash(gitleaks:*),Bash(bash -n:*),Bash(chmod:*),Bash(node:*),Bash(npm view:*),Bash(cat:*),Bash(head:*),Bash(tail:*),Bash(ls:*),Bash(find:*),Bash(grep:*),Bash(wc:*),Bash(sort:*),Bash(uniq:*),Bash(cut:*),Bash(awk:*),Bash(sed:*),Bash(jq:*),Bash(tr:*),Bash(sleep:*),Bash(date:*),Bash(env:*),Bash(mkdir:*),Bash(test:*),Bash(xargs:*),Bash(basename:*),Bash(dirname:*)"
+
+      - name: Continuation gate
+        if: ${{ always() && (github.event_name != 'issue_comment' || contains(github.event.comment.body, '@claude')) }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number || github.event.client_payload.issue }}
+          LABEL: ${{ github.event.label.name || github.event.client_payload.label }}
+          T0: ${{ steps.t0.outputs.iso }}
+          STARTSHA: ${{ steps.t0.outputs.startsha }}
+          CLAUDE_RESULT: ${{ steps.claude.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -uo pipefail
+          IS_PR=$(gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" --jq 'has("pull_request")' 2>/dev/null || echo false)
+          [ "$IS_PR" = "true" ] && { echo "SKIP: PR thread"; exit 0; }
+          PR=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "issue-$ISSUE" --state open --json number --jq '.[0].number // ""')
+          [ -n "$PR" ] && { echo "DONE: PR #$PR open for issue-$ISSUE"; exit 0; }
+          AQ=$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments --jq '[.comments[] | select(.body|startswith("ARCHITECT-QUESTION:"))] | last | .createdAt // ""')
+          [ -n "$AQ" ] && [[ "$AQ" > "$T0" ]] && { echo "AWAIT: fresh ARCHITECT-QUESTION"; exit 0; }
+          NOWSHA=$(git ls-remote origin "refs/heads/issue-$ISSUE" | cut -f1); [ -z "$NOWSHA" ] && NOWSHA=none
+          PROGRESS=no; { [ "$NOWSHA" != "$STARTSHA" ] && [ "$NOWSHA" != "none" ]; } && PROGRESS=yes
+          COUNT=$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments --jq '[.comments[].body | select(startswith("<!-- factory-continue"))] | length')
+          if [ "$PROGRESS" != "yes" ]; then
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Run ended ($CLAUDE_RESULT) with NO branch progress and no PR — task is STUCK, human review needed. $RUN_URL"
+            exit 0
+          fi
+          if [ "$COUNT" -ge "$RELAY_CAP" ]; then
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Continuation cap ($RELAY_CAP) reached without a PR — human review needed. Progress is on branch issue-$ISSUE (PROGRESS.md)."
+            exit 0
+          fi
+          N=$((COUNT+1))
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "<!-- factory-continue $N/$RELAY_CAP --> Auto-continuing: run ended ($CLAUDE_RESULT) before opening a PR; successor resumes from branch issue-$ISSUE + PROGRESS.md. $RUN_URL"
+          gh api "repos/$GITHUB_REPOSITORY/dispatches" -f event_type=relay -F "client_payload[issue]=$ISSUE" -F "client_payload[label]=${LABEL:-claude}"
+
+      - name: Rescue uncommitted work on failure
+        if: failure()
+        env:
+          ISSUE: ${{ github.event.issue.number || github.event.client_payload.issue }}
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            BR="rescue/issue-${ISSUE}-run-${{ github.run_id }}"
+            git checkout -b "$BR"
+            git add -A
+            git -c user.name="factory-rescue" -c user.email="rescue@factory" commit -m "rescue: uncommitted workspace state from failed run ${{ github.run_id }}"
+            git push origin "$BR" || echo "rescue push failed"
+          else
+            echo "workspace clean"
+          fi
+
+      - name: Dump execution diagnostics
+        if: always()
+        run: |
+          F="${{ runner.temp }}/claude-execution-output.json"
+          [ -f "$F" ] || { echo "no execution-output.json"; exit 0; }
+          grep -oiE '(permission[s]?[^"]{0,40}deni|tool_use[_ ]error|not allowed to use|requires approval|denied the request)[^"]{0,120}' "$F" | sort | uniq -c | sort -rn | head -20 || true
+          tail -c 6000 "$F" || true
