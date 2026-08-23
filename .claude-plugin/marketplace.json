@@ -1,0 +1,12 @@
+{
+  "name": "scalebridge",
+  "owner": { "name": "ScaleBridge" },
+  "plugins": [
+    {
+      "name": "scalebridge",
+      "source": "./",
+      "description": "ScaleBridge shared engineering skills and agents",
+      "version": "1.0.0"
+    }
+  ]
+}

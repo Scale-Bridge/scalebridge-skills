@@ -1,0 +1,9 @@
+{
+  "name": "scalebridge",
+  "description": "ScaleBridge shared engineering skills and agents",
+  "version": "1.0.0",
+  "author": { "name": "ScaleBridge" },
+  "homepage": "https://github.com/Scale-Bridge/scalebridge-skills",
+  "repository": "https://github.com/Scale-Bridge/scalebridge-skills",
+  "license": "MIT"
+}

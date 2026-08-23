@@ -1,22 +1,13 @@
 ---
 name: diagnosing-bugs
-description: Diagnosis loop for hard bugs and performance regressions. Use when an issue reports something broken/throwing/failing/slow, when a gate verdict flags a regression, or when the user says "diagnose"/"debug this". Enforces a red-capable feedback loop BEFORE any hypothesis.
+description: Diagnosis loop for hard bugs and performance regressions. Use when the user says "diagnose"/"debug this", or reports something broken/throwing/failing/slow. Enforces a red-capable feedback loop BEFORE any hypothesis.
 ---
 
 # Diagnosing Bugs
 
 > Adapted from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT).
-> **ScaleBridge adaptation.** This skill enforces *behavioral proof before
-> hypothesis* — build a repro that goes red on the real symptom before you
-> theorise. That is the discipline this project most often needs.
-> - **Headless (factory implementer in GitHub Actions):** phases 1–6 run
->   unattended. There is no user to check in with — where the upstream text says
->   "show the user", write the ranked hypotheses / repro command into the PR
->   body or the issue thread instead, and proceed. The HITL loop (Phase 1,
->   option 10) needs a human at a terminal, so it is **not available** in CI;
->   use options 1–9.
-> - **Local (developer machine):** the full skill applies, HITL loop included
->   (`scripts/hitl-loop.template.sh`).
+> The core discipline: build a repro that goes red on the real symptom **before**
+> you theorise. Behavioral proof before hypothesis.
 
 A discipline for hard bugs. Skip phases only when explicitly justified.
 
@@ -24,9 +15,9 @@ When exploring the codebase, read `CONTEXT.md` (if it exists) to get a clear men
 
 ## Redact
 
-This skill has you show commands, outputs and captured artifacts. **Redact every secret first**: write `<REDACTED>` in its place. Build loops against env vars, so the credential stays in the environment rather than in what you show. Captured artifacts carry auth headers: quote only the lines that carry the signal. (This project keeps all credentials out of git — never paste an n8n credential ID, webhook secret, or Twilio/SendGrid/ElevenLabs key into an issue, PR, or commit.)
+This skill has you show commands, outputs and captured artifacts. **Redact every secret first**: write `<REDACTED>` in its place. Build loops against env vars, so the credential stays in the environment rather than in what you show. Captured artifacts carry auth headers: quote only the lines that carry the signal. Redact anything credential-shaped for this project — keys, tokens, webhook secrets, credential IDs.
 
-If the redacted output is not enough to diagnose the bug, say so and ask (local) or note it in the PR and proceed with what you have (factory).
+If the redacted output is not enough to diagnose the bug, say so and ask the user.
 
 ## Phase 1: Build a feedback loop
 
@@ -45,7 +36,7 @@ Spend disproportionate effort here. **Be aggressive. Be creative. Refuse to give
 7. **Property / fuzz loop.** If the bug is "sometimes wrong output", run 1000 random inputs and look for the failure mode.
 8. **Bisection harness.** If the bug appeared between two known states (commit, dataset, version), automate "boot at state X, check, repeat" so you can `git bisect run` it.
 9. **Differential loop.** Run the same input through old-version vs new-version (or two configs) and diff outputs.
-10. **HITL bash script.** Last resort, **local only**. If a human must click, drive _them_ with `scripts/hitl-loop.template.sh` so the loop is still structured. Captured output feeds back to you. (Unavailable in CI — no interactive terminal.)
+10. **HITL bash script.** Last resort. If a human must click, drive _them_ with `scripts/hitl-loop.template.sh` so the loop is still structured. Captured output feeds back to you.
 
 Build the right feedback loop, and the bug is 90% fixed.
 
@@ -65,16 +56,16 @@ The goal is not a clean repro but a **higher reproduction rate**. Loop the trigg
 
 ### When you genuinely cannot build a loop
 
-Stop and say so explicitly. List what you tried. Ask for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary instrumentation. Do **not** proceed to hypothesise without a loop. (Factory: record this in the PR/issue and escalate rather than guessing.)
+Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary instrumentation. Do **not** proceed to hypothesise without a loop.
 
 ### Completion criterion: a tight loop that goes red
 
 Phase 1 is done when the loop is **tight** and **red-capable**: you can name **one command** (a script path, a test invocation, a curl) that you have **already run at least once** (show the invocation and its output, redacted), and that is:
 
-- [ ] **Red-capable**: it drives the actual bug code path and asserts the **exact reported symptom**, so it can go red on this bug and green once fixed. Not "runs without erroring"; it must be able to _catch this specific bug_.
+- [ ] **Red-capable**: it drives the actual bug code path and asserts the **user's exact symptom**, so it can go red on this bug and green once fixed. Not "runs without erroring"; it must be able to _catch this specific bug_.
 - [ ] **Deterministic**: same verdict every run (flaky bugs: a pinned, high reproduction rate, per above).
 - [ ] **Fast**: seconds, not minutes.
-- [ ] **Agent-runnable**: you can run it unattended (a human in the loop only via `scripts/hitl-loop.template.sh`, local only).
+- [ ] **Agent-runnable**: you can run it unattended; a human in the loop only via `scripts/hitl-loop.template.sh`.
 
 If you catch yourself reading code to build a theory before this command exists, **stop: jumping straight to a hypothesis is the exact failure this skill prevents.** No red-capable command, no Phase 2.
 
@@ -84,7 +75,7 @@ Run the loop. Watch it go red as the bug appears.
 
 Confirm:
 
-- [ ] The loop produces the **reported** failure mode, not a different failure that happens to be nearby. Wrong bug = wrong fix.
+- [ ] The loop produces the failure mode the **user** described, not a different failure that happens to be nearby. Wrong bug = wrong fix.
 - [ ] The failure is reproducible across multiple runs (or, for non-deterministic bugs, reproducible at a high enough rate to debug against).
 - [ ] You have captured the exact symptom (error message, wrong output, slow timing) so later phases can verify the fix actually addresses it.
 
@@ -108,7 +99,7 @@ Each hypothesis must be **falsifiable**: state the prediction it makes.
 
 If you cannot state the prediction, the hypothesis is a vibe: discard or sharpen it.
 
-**Record the ranked list before testing.** Locally, show it to the user — they often have domain knowledge that re-ranks instantly ("we just deployed a change to #3"). In the factory, write it into the PR body so a reviewer (or the QA gate) can see your reasoning. Don't block on a response; proceed with your ranking.
+**Show the ranked list to the user before testing.** They often have domain knowledge that re-ranks instantly ("we just deployed a change to #3"), or know hypotheses they've already ruled out. Cheap checkpoint, big time saver. Don't block on it; proceed with your ranking if the user is AFK.
 
 ## Phase 4: Instrument
 
@@ -130,7 +121,7 @@ Write the regression test **before the fix**, but only if there is a **correct s
 
 A correct seam is one where the test exercises the **real bug pattern** as it occurs at the call site. If the only available seam is too shallow (single-caller test when the bug needs multiple callers, unit test that can't replicate the chain that triggered the bug), a regression test there gives false confidence.
 
-**If no correct seam exists, that itself is the finding.** Note it. The codebase architecture is preventing the bug from being locked down. Flag this for the next phase (factory: as an `ISSUE-SUGGESTION:` line in the PR body).
+**If no correct seam exists, that itself is the finding.** Note it. The codebase architecture is preventing the bug from being locked down. Flag this for the next phase.
 
 If a correct seam exists:
 
