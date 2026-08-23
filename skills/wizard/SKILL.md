@@ -1,26 +1,15 @@
 ---
 name: wizard
-description: Generate an interactive bash wizard that walks a human through steps only they can perform. Use when provisioning credentials or CI secrets, walking an unfamiliar third-party dashboard, or running a one-off migration/cutover. Don't invoke this for steps the agent can perform itself.
+description: Generate an interactive bash wizard that walks a human through steps only they can perform. Use when provisioning infrastructure, setting up credentials or CI secrets, walking an unfamiliar third-party dashboard, or running a one-off migration or cutover. Don't invoke this for steps the agent can perform itself.
 ---
 
 # Wizard
-
-> Adapted from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT).
-> **Notes:** This is interactive — it opens browsers and blocks on human input,
-> so it is run by a human at a terminal, never headless (CI/SSH). Two guardrails
-> that always apply: (1) **respect the project's integration boundaries** — if
-> the project has declared a service standalone or out-of-scope (check its ADRs /
-> CLAUDE.md), do not author wizard stages that integrate it. (2) **Secret
-> hygiene** — a generated wizard captures secrets; before any commit, gitignore
-> the script (or keep it in a gitignored scratch dir) and never let a captured
-> value land in a tracked file. `template.sh` ships an illustrative Stripe stage;
-> it is an example only, not a suggestion to build that integration.
 
 A **wizard** is a bash script that walks a human, step by step, through a manual procedure that's tedious to do by hand and tedious to re-explain to an AI every time. It opens each URL, says exactly what to click and copy, captures the values, writes them where they belong (`.env`, GitHub secrets), confirms at every stage, and shows how many stages are left. It might configure third-party services, run a one-off migration, or move the project from one state to another.
 
 The delightful UX is already solved by [template.sh](template.sh): stage-by-stage progress, confirmation gates, cross-platform URL opening (including WSL), hidden secret entry, idempotent `.env` upserts, `gh secret`/`gh variable` writes, and a closing summary. **Your job is only to scope the procedure and author its stages.** The library above the `STAGES` marker is identical in every wizard; that consistency is the point: never hand-edit it.
 
-A wizard is ephemeral by default: built for one run, saved to a scratch or `scripts/` path, deleted when the job's done. Commit it only when the user wants a repeatable setup path that should live in the repo — and only after confirming it captures no secret into tracked content.
+A wizard is ephemeral by default: built for one run, saved to a scratch or `scripts/` path, deleted when the job's done. Commit it only when the user wants a repeatable setup path that should live in the repo.
 
 ## Process
 
@@ -52,5 +41,4 @@ Hold the bar the template sets: open the URL before asking for its value, use `a
 - `bash -n <script>`; run `shellcheck` if available.
 - `chmod +x <script>`.
 - Don't run it end-to-end yourself: it opens browsers and blocks on human input. Trace it statically instead: every value from step 1 is captured and lands where step 1 said, and every `set_secret` name exactly matches a `secrets.*` reference in CI.
-- Confirm the script is gitignored (or captures nothing secret) before it is committed.
 - Tell the user how to run it. If it's a repeatable setup path, commit it and link it from the README so the next person runs the script instead of asking an AI.

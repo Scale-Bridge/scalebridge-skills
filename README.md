@@ -17,7 +17,7 @@ Skills then invoke as `/scalebridge:<name>` — e.g. `/scalebridge:bulletproof`.
 
 `bulletproof`, `domain-modeling`, `tdd`, `diagnosing-bugs`, `grilling`,
 `handoff`, `wait-what`, `resolving-merge-conflicts`, `wizard`, `prototype`,
-`to-questionnaire`, and `implement`. Generic sub-agents live in `agents/`.
+`to-questionnaire`. Generic sub-agents live in `agents/`.
 
 ## Hermes sync (non-Claude-Code consumers)
 
