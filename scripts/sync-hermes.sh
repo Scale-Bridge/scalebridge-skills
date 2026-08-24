@@ -70,7 +70,13 @@ for skill in "${SHARED[@]}"; do
   for base in "${TARGETS[@]}"; do
     case "$base/" in "$APPROVED_VOLUME"/*) : ;; *) echo "ERROR: unsafe destination ancestry: $base" >&2; exit 2 ;; esac
     dest="$base/$skill"
-    if [ -L "$base" ] || [ -L "$dest" ]; then echo "ERROR: symlink in destination path: $dest" >&2; exit 2; fi
+    # reject a symlink at ANY path component below the approved volume (not just base/dest)
+    rel="${base#"$APPROVED_VOLUME"/}"; cur="$APPROVED_VOLUME"
+    IFS='/' read -r -a _parts <<< "$rel/$skill"
+    for _p in "${_parts[@]}"; do
+      cur="$cur/$_p"
+      if [ -L "$cur" ]; then echo "ERROR: symlink in destination path component: $cur" >&2; exit 2; fi
+    done
     if [ -e "$dest" ] && [ ! -d "$dest" ]; then echo "ERROR: destination exists and is not a directory: $dest" >&2; exit 2; fi
     if [ -d "$dest" ] && diff -rq "$SRC/$skill" "$dest" >/dev/null 2>&1; then
       unchanged=$((unchanged + 1)); continue                      # true no-op
@@ -78,7 +84,7 @@ for skill in "${SHARED[@]}"; do
     if [ "$DRYRUN" = "1" ]; then echo "[dry-run] would update $skill -> $dest"; changed=$((changed + 1)); continue; fi
     mkdir -p "$base"
     [ -d "$dest" ] && mv "$dest" "$dest.bak-$TS"                  # one atomic backup
-    cp -a --no-dereference "$SRC/$skill" "$dest"                  # no-follow write
+    cp -a --no-dereference "$SRC/$skill" "$dest" || { echo "ERROR: copy failed: $skill -> $dest" >&2; exit 1; }
     chown -R 0:0 "$dest" 2>/dev/null || true
     changed=$((changed + 1))
   done
