@@ -23,6 +23,13 @@ jobs:
         run: |
           jq . .claude-plugin/plugin.json > /dev/null
           jq . .claude-plugin/marketplace.json > /dev/null
+      - name: Validate plugin (strict)
+        env:
+          CLAUDE_CODE_VERSION: "2.1.241"
+          DISABLE_AUTOUPDATER: "1"
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s "$CLAUDE_CODE_VERSION"
+          "$HOME/.local/bin/claude" plugin validate . --strict
       - name: Skill + agent frontmatter present
         run: |
           fail=0
@@ -37,13 +44,25 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y shellcheck >/dev/null
           shellcheck scripts/sync-hermes.sh
           bash -n scripts/sync-hermes.sh
-      - name: Secret scan (gitleaks)
+      - name: Secret scan (gitleaks, SHA-pinned)
+        env:
+          GITLEAKS_VERSION: "8.30.1"
+          GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
         run: |
-          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | tar -xz gitleaks
+          A="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSLo "$A" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${A}"
+          echo "${GITLEAKS_SHA256}  ${A}" | sha256sum -c -
+          tar -xzf "$A" gitleaks
           ./gitleaks detect --source . --no-banner --redact
-      - name: No tool attribution in the PR's commits
+      - name: No tool attribution in the PR's commits or body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
-          if git log --format='%s%n%b' "$RANGE" | grep -qiE 'co-authored-by:.*claude|generated with.*claude|claude\.com/claude-code'; then
+          RE='co-authored-by:.*claude|generated with.*claude|claude\.com/claude-code'
+          if git log --format='%s%n%b' "$RANGE" | grep -qiE "$RE"; then
             echo "::error::tool attribution found in a PR commit message"; exit 1
+          fi
+          if printf '%s' "$PR_BODY" | grep -qiE "$RE"; then
+            echo "::error::tool attribution found in the PR body"; exit 1
           fi
