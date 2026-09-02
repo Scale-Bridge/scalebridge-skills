@@ -74,12 +74,37 @@ the deliverable — a PR or verdict without them is incomplete.
   side demonstrated against a HAND-BUILT violation. Agent-built violations are
   circular (a working guard prevents the agent from constructing one), and
   "fails safe by construction" does not cover the silent-no-op case — a guard
-  that never engages looks exactly like success.
+  that never engages looks exactly like success. **Per-axis, never an OR:** a
+  claim covering multiple detection axes (raw AND formatted, element AND MIME
+  reference, transcript AND summary) needs one independent failure proof per
+  axis — one violation carrying every payload yields a single binary verdict
+  that any one axis can satisfy while the others stay unproven.
 - **Alien-system rule:** any external-system behavior this work depends on —
   units, event semantics, defaults, identity/permission behavior — is probed
   empirically before building on it. Doc summaries and memory state hypotheses,
   not facts. (Empirically: every late-found defect in this factory came from an
   unprobed assumption; nothing probed first ever produced a late surprise.)
+
+## Fix-pass and iteration discipline (adversarial loops)
+
+Measured across a 30+-round adversarial review program: roughly HALF of all
+late findings lived inside the previous iteration's own fix text. Three rules
+collapse that tail:
+
+1. **Gate-site self-check before handing off:** every fixture, test, or gate
+   your fix PROMISES must verifiably exist at its gate site (the milestone
+   accept, the test file, the CI config) — not just at the claim site where
+   the promise is written. Then residue-grep every term your fix touched;
+   stale echoes of the pre-fix wording survive in cross-references almost
+   every time.
+2. **State-machine fixes get the full cross-product immediately:** if the fix
+   touches writers × states × timings (retries, upgrades, redeliveries),
+   enumerate the whole cross-product NOW — a reviewer's single finding must
+   never set the fix's scope, or the mechanism leaks one path per iteration.
+3. **New design content gets the definitional walk:** a new fixture, route,
+   field, or enum value authored mid-loop must be walked through EVERY
+   definition it touches (vocabularies, tables, schemas, seam contracts)
+   before it lands — patch discipline is not enough for design content.
 
 ## Where the answers go
 
