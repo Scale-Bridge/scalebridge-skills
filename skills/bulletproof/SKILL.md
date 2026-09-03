@@ -121,7 +121,10 @@ worked at document altitude. Fresh CONTEXT is not fresh FRAME.)
 
 For a STAMP-GRADE claim — done / accepted / build-ready / "bulletproof" on an
 artifact others will build on — the self-applied interrogation is necessary
-and NEVER sufficient. The stamp additionally requires an outside-FRAME pass:
+and NEVER sufficient. Gate machinery is itself stamp-grade: a change to this
+skill, a review agent, or a definition-of-done ships only with both passes
+already run and published — never parked on the owner (owner merge is
+authorization, not QA). The stamp additionally requires an outside-FRAME pass:
 
 1. **Map-free brief.** The outside reviewer receives the artifact and the
    DOMAIN's requirements only — never the author's scope map, status ledger,
