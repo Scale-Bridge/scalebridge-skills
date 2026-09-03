@@ -30,9 +30,9 @@ dependency or touches an external system WITHOUT this section is incomplete,
 and the QA/security gate flags its absence as a finding. This is the mechanical
 teeth: the reflex is enforced by a required, checkable artifact, not by memory.
 
-(Every late defect in this factory traced to skipping step 1 or 2 — pnpm's unit
+(Every late defect we have traced came from skipping step 1 or 2 — pnpm's unit
 was minutes-not-days, `npx stryker` was the wrong package, a security field was
-delivered empty. Nothing probed-first ever produced a late surprise.)
+delivered empty. Nothing probed-first has produced a late surprise yet.)
 
 # The bulletproof interrogation (mandatory, self-applied)
 
@@ -83,8 +83,8 @@ the deliverable — a PR or verdict without them is incomplete.
 - **Alien-system rule:** any external-system behavior this work depends on —
   units, event semantics, defaults, identity/permission behavior — is probed
   empirically before building on it. Doc summaries and memory state hypotheses,
-  not facts. (Empirically: every late-found defect in this factory came from an
-  unprobed assumption; nothing probed first ever produced a late surprise.)
+  not facts. (Empirically: every late-found defect we have traced came from an
+  unprobed assumption; nothing probed first has produced a late surprise yet.)
 
 ## Fix-pass and iteration discipline (adversarial loops)
 
@@ -126,16 +126,26 @@ skill, a review agent, or a definition-of-done ships only with both passes
 already run and published — never parked on the owner (owner merge is
 authorization, not QA). The stamp additionally requires an outside-FRAME pass:
 
-1. **Map-free brief.** The outside reviewer receives the artifact and the
-   DOMAIN's requirements only — never the author's scope map, status ledger,
-   fix history, or review narrative. An author-briefed reviewer is the
-   author's frame wearing a fresh context; the map standardizes the blindness.
-   Cross-model when available.
-2. **Absence review.** Enumerate what the domain demands (monitoring
-   independence, capacity/arrival model, an end-to-end SLO for every sold
-   promise, failure-domain separation, PII lifecycle incl. the vendor side,
-   DR incl. adversarial deletion, rollout/rollback) and check for MISSING
-   sections. Gate-site tooling — greps, fixture checks, cross-products —
+1. **Map-free brief, reviewer-derived requirements.** The outside reviewer
+   receives the artifact plus pointers to canonical domain sources (the sold
+   promise, the offer, the contract) — never the author's scope map, status
+   ledger, fix history, review narrative, or an author-authored requirements
+   list: the reviewer DERIVES the domain's requirements from zero and
+   publishes that list in its verdict BEFORE its findings. An author-supplied
+   requirements checklist inside a brief is itself a reportable finding — it
+   is a scope map wearing a different name. Rival ladder, in order: (a)
+   build-ready-class stamps → an owner-run rival-model audit (the owner
+   pastes the canned versioned brief; judgment is the rival's — the owner
+   only relays, so this is not owner-QA); (b) a different model family
+   invoked directly; (c) same model map-free ONLY with `SAME-MODEL PASS`
+   declared in the stamp record — a same-model agent roleplaying the rival
+   is still same-model.
+2. **Absence review.** Enumerate what the domain demands (e.g., for an ops
+   platform: monitoring independence, capacity/arrival model, an end-to-end
+   SLO for every sold promise, failure-domain separation, PII lifecycle incl.
+   the vendor side, DR incl. adversarial deletion, rollout/rollback) and
+   check for MISSING sections — the list is an exemplar, never the ceiling:
+   the reviewer's own derived list governs. Gate-site tooling — greps, fixture checks, cross-products —
    interrogates only text that exists; defects hide in text, blockers hide
    in absences.
 3. **Register re-grade at stamp time.** Walk every open debt / deferred /
@@ -156,10 +166,23 @@ authorization, not QA). The stamp additionally requires an outside-FRAME pass:
    uncited load-bearing fact. (Measured: retries-off-by-default, a 1-CPS
    outbound queue, and versioning-off storage all lived on never-cited pages;
    40/40 citation re-checks passed while all three stayed invisible.)
-6. **Adjudicate both directions.** Outside findings are verified against
-   current text (CONFIRMED / PARTIAL / REFUTED, with quotes) before
-   acceptance — auditors err too (measured: 2 of 14 findings partially
-   refuted, incl. a missed existing load-test gate).
+6. **Adjudicate both directions — but never refute your own reviewer.**
+   Outside findings are verified against current text (CONFIRMED / PARTIAL /
+   REFUTED, with quotes) before acceptance — auditors err too (measured: 2
+   of 14 findings partially refuted, incl. a missed existing load-test
+   gate). The author may ACCEPT findings alone; REFUTING or downgrading a
+   stamp-blocking finding requires an independent adjudicator (fresh agent
+   or the owner), and unresolved disagreement withholds the stamp.
+
+**The stamp record (mechanical teeth).** Every outside-frame pass commits a
+dated record to the consuming repo's audit directory (e.g. `docs/audits/`):
+the verbatim brief, the reviewer's derived requirement list, the full
+verdict, the adjudication table, and which reviewer definition + model ran
+(`SAME-MODEL PASS` declared when applicable). A stamp without its record is
+invalid — the record is what lets anyone later distinguish a real pass from
+a theatrical one (diff the brief against the author's map). Founding-incident
+records: `docs/audits/voice-platform-umbrella-prd-audit-2026-09-03.md` and
+`docs/audits/stamp-record-gate-system-2026-09-03.md` (scalebridge-ops).
 
 ## Where the answers go
 
