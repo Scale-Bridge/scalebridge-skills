@@ -121,10 +121,15 @@ worked at document altitude. Fresh CONTEXT is not fresh FRAME.)
 
 For a STAMP-GRADE claim — done / accepted / build-ready / "bulletproof" on an
 artifact others will build on — the self-applied interrogation is necessary
-and NEVER sufficient. Gate machinery is itself stamp-grade: a change to this
-skill, a review agent, or a definition-of-done ships only with both passes
-already run and published — never parked on the owner (owner merge is
-authorization, not QA). The stamp additionally requires an outside-FRAME pass:
+and NEVER sufficient. **Stamp-grade is defined by effect, not label:** any
+artifact another agent, workflow, or milestone cites, builds on, or depends on
+is stamp-grade regardless of what it is called — "DRAFT", "interim", "working
+notes", "orchestrator-interrogated" do NOT exempt it (that move let a schema
+annex escape the loop and carry the worst CRITICAL). Gate machinery is itself
+stamp-grade: a change to this skill, a review agent, or a definition-of-done
+ships only with both passes already run and published — never parked on the
+owner (owner merge is authorization, not QA). The stamp additionally requires
+an outside-FRAME pass:
 
 1. **Map-free brief, reviewer-derived requirements.** The outside reviewer
    receives the artifact plus pointers to canonical domain sources (the sold
@@ -133,13 +138,17 @@ authorization, not QA). The stamp additionally requires an outside-FRAME pass:
    list: the reviewer DERIVES the domain's requirements from zero and
    publishes that list in its verdict BEFORE its findings. An author-supplied
    requirements checklist inside a brief is itself a reportable finding — it
-   is a scope map wearing a different name. Rival ladder, in order: (a)
-   build-ready-class stamps → an owner-run rival-model audit (the owner
-   pastes the canned versioned brief; judgment is the rival's — the owner
-   only relays, so this is not owner-QA); (b) a different model family
-   invoked directly; (c) same model map-free ONLY with `SAME-MODEL PASS`
-   declared in the stamp record — a same-model agent roleplaying the rival
-   is still same-model.
+   is a scope map wearing a different name. Rival ladder — independence
+   first, capability second, in order: (a) build-ready-class stamps → an
+   owner-run rival-model audit (the owner pastes the canned versioned brief;
+   judgment is the rival's — the owner only relays, so this is not owner-QA);
+   (b) a different model FAMILY invoked directly (a different family beats a
+   stronger same-family model — the goal is independence, not horsepower);
+   (c) same family map-free ONLY with `SAME-MODEL PASS` declared in the stamp
+   record — a same-model agent roleplaying the rival is still same-model. The
+   reviewer runs from a **committed adversarial-reviewer definition file**
+   (e.g. this plugin's `agents/reviewer.md`), never an ad-hoc general-purpose
+   agent whose prompt cannot be diffed for drift; the record names that path.
 2. **Absence review.** Enumerate what the domain demands (e.g., for an ops
    platform: monitoring independence, capacity/arrival model, an end-to-end
    SLO for every sold promise, failure-domain separation, PII lifecycle incl.
@@ -169,19 +178,23 @@ authorization, not QA). The stamp additionally requires an outside-FRAME pass:
 6. **Adjudicate both directions — but never refute your own reviewer.**
    Outside findings are verified against current text (CONFIRMED / PARTIAL /
    REFUTED, with quotes) before acceptance — auditors err too (measured: 2
-   of 14 findings partially refuted, incl. a missed existing load-test
-   gate). The author may ACCEPT findings alone; REFUTING or downgrading a
-   stamp-blocking finding requires an independent adjudicator (fresh agent
-   or the owner), and unresolved disagreement withholds the stamp.
+   of 14 findings adjudicated PARTIAL — not refuted — incl. a missed existing
+   load-test gate). The author may ACCEPT findings alone; REFUTING or
+   downgrading a stamp-blocking finding requires an independent adjudicator
+   (fresh agent or the owner), and unresolved disagreement withholds the stamp.
 
 **The stamp record (mechanical teeth).** Every outside-frame pass commits a
-dated record to the consuming repo's audit directory (e.g. `docs/audits/`):
-the verbatim brief, the reviewer's derived requirement list, the full
-verdict, the adjudication table, and which reviewer definition + model ran
-(`SAME-MODEL PASS` declared when applicable). A stamp without its record is
-invalid — the record is what lets anyone later distinguish a real pass from
-a theatrical one (diff the brief against the author's map). Founding-incident
-records: `docs/audits/voice-platform-umbrella-prd-audit-2026-09-03.md` and
+dated record to the consuming repo's audit directory (`docs/audits/`) with
+these as NAMED, NON-EMPTY sections — a missing/empty section means the step
+was skipped and the stamp is invalid: gate version · verbatim brief ·
+reviewer-derived requirement list · verdict · adjudication table · committed
+reviewer-definition path + version + model (`SAME-MODEL PASS` when applicable;
+"ad-hoc" is not a path) · skills invoked (each its own sub-section or
+`N/A — <reason>`) · discovery log (or `N/A — no external critical path`). Also
+append a row to `docs/audits/stamp-registry.md`. A one-shot bootstrap omission
+may read `BOOTSTRAP N/A — <reason>` only on a gate's first self-stamp and must
+close next pass. Founding records:
+`docs/audits/voice-platform-umbrella-prd-audit-2026-09-03.md` and
 `docs/audits/stamp-record-gate-system-2026-09-03.md` (scalebridge-ops).
 
 ## Where the answers go
