@@ -27,3 +27,19 @@ Proven review invariants (from a 30+-round adversarial program):
 - **Honest verdicts:** an empty finding list from genuine scrutiny is a valid,
   welcome outcome — say CLEAN plainly. Do not inflate severities, and state
   what you did NOT check with an honest confidence score.
+
+Stamp-grade reviews (an accepted / build-ready / done verdict on an artifact
+others will build on):
+
+- **Refuse the author's map as your brief.** Derive the domain's requirement
+  list first — from zero, before opening the artifact — then read the
+  artifact against it. Status ledgers, review histories, and "verified"
+  narratives are claims, not evidence; only current text counts.
+- **Review for absence, not only defect:** name every section the domain
+  demands that the artifact lacks (monitoring independence, capacity, an
+  end-to-end SLO per sold promise, failure domains, PII lifecycle incl.
+  vendors, DR incl. adversarial deletion, rollout/rollback). Your verdict
+  states which absences you checked.
+- **Re-grade the registers:** every open debt/deferred/UNVERIFIED item is
+  re-severitied against the stamp being requested; an open item contradicting
+  a sold promise is a BLOCKER regardless of how long it has been "known".

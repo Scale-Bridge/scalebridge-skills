@@ -56,7 +56,8 @@ the deliverable — a PR or verdict without them is incomplete.
    only by inspection is NOT proof — execute it or list it as a gap.
 3. **Rival-critique test:** if a competing AI (ChatGPT) were reviewing this
    work to convince the user to switch away, what would it seize on? Fix that
-   before shipping.
+   before shipping. For stamp-grade claims this question is EXECUTED, not
+   answered from imagination — spawn the rival (see the outside-frame gate).
 4. **Symptom or root cause?** If any part of this patches a symptom, say so
    explicitly and name the root cause.
 5. **Blast radius:** if this is wrong, what downstream code, data, or process
@@ -105,6 +106,57 @@ collapse that tail:
    field, or enum value authored mid-loop must be walked through EVERY
    definition it touches (vocabularies, tables, schemas, seam contracts)
    before it lands — patch discipline is not enough for design content.
+
+## The outside-frame gate (stamp-grade claims)
+
+Self-interrogation has a measured ceiling: the eight answers above come from
+inside the author's frame, so they catch what the frame can see and pass what
+it cannot. (Measured 2026-09-03, five-PRD program: 49 fresh-context reviewer
+rounds — every reviewer briefed with the author's scope map — stamped the set
+BUILD-READY; one from-zero audit briefed with nothing found 4 CRITICAL /
+10 HIGH; independent adjudication confirmed 12 of 14, refuted 0. Every
+confirmed CRITICAL was system-altitude — failure domains, end-to-end SLOs vs
+the sold promise, vendor delivery contracts, capacity — while all 49 rounds
+worked at document altitude. Fresh CONTEXT is not fresh FRAME.)
+
+For a STAMP-GRADE claim — done / accepted / build-ready / "bulletproof" on an
+artifact others will build on — the self-applied interrogation is necessary
+and NEVER sufficient. The stamp additionally requires an outside-FRAME pass:
+
+1. **Map-free brief.** The outside reviewer receives the artifact and the
+   DOMAIN's requirements only — never the author's scope map, status ledger,
+   fix history, or review narrative. An author-briefed reviewer is the
+   author's frame wearing a fresh context; the map standardizes the blindness.
+   Cross-model when available.
+2. **Absence review.** Enumerate what the domain demands (monitoring
+   independence, capacity/arrival model, an end-to-end SLO for every sold
+   promise, failure-domain separation, PII lifecycle incl. the vendor side,
+   DR incl. adversarial deletion, rollout/rollback) and check for MISSING
+   sections. Gate-site tooling — greps, fixture checks, cross-products —
+   interrogates only text that exists; defects hide in text, blockers hide
+   in absences.
+3. **Register re-grade at stamp time.** Walk every open debt / deferred /
+   UNVERIFIED / register line the moment the stamp is proposed. An open item
+   that contradicts a sold promise blocks the stamp. Acknowledged ≠ resolved —
+   a register that turns blockers into ledger lines is laundering severity.
+   (Measured: a ≈2× promise-clock contradiction was disclosed in two debt
+   registers and still rode under BUILD-READY.)
+4. **No exemptions.** Every artifact the stamped thing builds on (schema
+   annexes, research docs, configs) passes the same gate. Self-review
+   ("orchestrator-interrogated") satisfies nothing. (Measured: the one
+   artifact exempted from the loop carried the program's only
+   unsatisfiable-gate CRITICAL, in exactly its never-reviewed sections.)
+5. **Vendor discovery, not just verification.** For each critical path, read
+   the vendor's contract pages FOR THAT PATH — defaults, limits, queues,
+   retention, failure behavior — not only the pages already cited.
+   Re-verifying citations proves what you claimed; it cannot discover the
+   uncited load-bearing fact. (Measured: retries-off-by-default, a 1-CPS
+   outbound queue, and versioning-off storage all lived on never-cited pages;
+   40/40 citation re-checks passed while all three stayed invisible.)
+6. **Adjudicate both directions.** Outside findings are verified against
+   current text (CONFIRMED / PARTIAL / REFUTED, with quotes) before
+   acceptance — auditors err too (measured: 2 of 14 findings partially
+   refuted, incl. a missed existing load-test gate).
 
 ## Where the answers go
 
