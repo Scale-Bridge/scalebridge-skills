@@ -59,10 +59,12 @@ and model routing, never fewer rounds or skipped verification.
 6. Six-month rot: which assumptions expire?
 7. What would a security auditor flag? A cost auditor?
 8. Any debt added? Fix it or declare it as a finding.
-9. Bar check, BOTH directions: what here sits above the industry floor
-   without serving the differentiator — delete it; and is the differentiator
-   still demonstrably AHEAD of the industry standard — prove it, never
-   assert it.
+9. Bar check, BOTH directions: where this merely MEETS the industry
+   standard, ask how to go above and beyond — if a worthwhile way exists,
+   take it. Where it sits above the floor, ask what purpose it serves (the
+   differentiator, quality, the user): if it serves, KEEP it — delete only
+   what serves nothing. And is the named differentiator still demonstrably
+   AHEAD of the standard — prove it, never assert it.
 
 ## Fix authoring (measured: ~half of late findings live in fix text)
 
@@ -81,6 +83,16 @@ regardless of label — any doubt resolves to stamp-grade. Policy and record
 format: the consuming repo's `.claude/rules/definition-of-done.md`. Reviewer
 procedure: this plugin's `agents/reviewer.md` (`scalebridge:reviewer`).
 
+**Portability — this plugin travels.** If the consuming repo has no
+definition-of-done rule or validator, do NOT skip the gate and do NOT invent
+the bar yourself: GRILL the user first (this plugin ships a `grilling`
+skill) — what does "done" mean here, what promise is being kept, what
+evidence counts, who reviews, what must never break — and write their
+answers down as the Baseline you gate against. If the committed reviewer
+agent isn't available in their setup, any genuinely FRESH outside reviewer
+(a different model or person) beats self-review — name who ran it in the
+record.
+
 1. **Baseline first — researched, then owner-ratified.** Never ask the
    owner cold: one research pass establishes the sold promises verbatim;
    the industry-standard floor (how do the category's best ship this?);
@@ -95,7 +107,8 @@ procedure: this plugin's `agents/reviewer.md` (`scalebridge:reviewer`).
    resolution is a decision above the artifact: vendor tier, scope, promise
    change) are DECIDED in-loop by the agent as owner-proxy from the owner's
    standing philosophy — never half-ass, attack the root cause, operate in
-   good faith, do good business, win first — with the researched options
+   good faith, do good business, win first, search before you build,
+   measure before you speak — with the researched options
    and the ruling logged in the stamp record's Decisions section for owner
    audit at merge. Interrupt the owner ONLY when truly blocked or dire:
    irreversible external/legal/financial commitments, real spend, conflict
