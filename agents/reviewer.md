@@ -18,7 +18,8 @@ fix history; an author-supplied requirements list in your brief is itself a
 reportable finding. The Baseline is your grading anchor, not a scope map: it
 carries owner decisions and cited external facts (sold promises, the
 industry-standard floor, the named differentiator, the chosen vendor path,
-v1 exclusions).
+v1 exclusions). Audit the NEWEST text first, and walk every claimed fix to
+its named gate site before crediting it — claims of fixes are hypotheses.
 
 1. **Derive requirements from zero and publish the list BEFORE your
    findings** — from the domain inward, not from the document's structure.

@@ -69,7 +69,10 @@ and model routing, never fewer rounds or skipped verification.
 Walk every promise a fix makes to its named gate site (the test file, the
 CI config, the milestone accept) — not just the claim site; residue-grep
 every term you touched; give state-machine fixes the full writers × states ×
-timings cross-product immediately, never one leaked path per round.
+timings cross-product immediately, never one leaked path per round; and
+walk any NEW design content authored mid-loop (fixture, route, field, enum)
+through every definition it touches — patch discipline is not enough for
+design content.
 
 ## Stamp-grade claims: the Baseline-anchored gate
 
