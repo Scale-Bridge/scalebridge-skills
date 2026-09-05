@@ -2,126 +2,127 @@
 name: bulletproof
 description: >
   MANDATORY before declaring any work done, opening a PR, or issuing a gate
-  verdict: run the bulletproof interrogation against your own output, publish
-  the answers, and convert out-of-scope findings into issue suggestions.
+  verdict: verify externals first, search for the shipped solution before
+  designing one, run the interrogation, and gate stamp-grade claims through
+  the Baseline-anchored two-round outside pass. Industry standard is the
+  floor, plus one named differentiator that beats it.
 ---
 
-# STEP 0 — VERIFY BEFORE YOU BUILD (mandatory, ordered, produces an artifact)
+# What "bulletproof" means here
 
-Two failure classes cause almost every late defect, and each has its own fix.
-Run BOTH before writing code that depends on anything you didn't author:
+Industry standard is the FLOOR, never the target: match how the category's
+best actually ship, then beat them in one NAMED place — the differentiator.
+Excellence is concentrated, not smeared: above-floor effort that serves no
+differentiator is over-engineering (a reportable finding), and a
+"differentiator" at mere parity with the standard is a broken promise (also
+a finding). The word "bulletproof" keeps its hard price — zero gaps testable
+by you — and green keeps its: a CLEAN outside pass, zero unresolved
+findings. The Baseline aims the loop and research shrinks it; neither ever
+lowers it.
 
-1. **SEARCH the web / primary source** for every EXTERNAL-system fact you're
-   about to rely on — a tool's flag, a package name/version, an API shape, a
-   unit, an event's semantics, a default, a platform behavior. Memory and doc
-   *summaries* are hypotheses, not facts. Get the primary source (official
-   docs, the package registry, the actual API response).
-2. **TEST from first principles** — don't trust even the primary source's
-   prose; run the smallest experiment that proves the behavior, and prove it in
-   BOTH directions (the thing works AND the failure/guard actually fires). A
-   check that cannot fail proves nothing (a validator that always passes, an
-   exit code captured from the wrong command).
-3. Only THEN build on it.
+# STEP 0 — verify before you build
 
-**Publish the results** in a `## Verified before building` section of the PR
-(or, for a gate, in your evidence): one line per external fact — `<claim> |
-<how verified: search URL or probe command> | <result>`. A PR that adds a
-dependency or touches an external system WITHOUT this section is incomplete,
-and the QA/security gate flags its absence as a finding. This is the mechanical
-teeth: the reflex is enforced by a required, checkable artifact, not by memory.
+For every external fact you rely on (flag, version, API shape, unit,
+default, event semantics): (1) fetch the primary source — memory and doc
+summaries are hypotheses; (2) probe the behavior in BOTH directions — it
+works AND the guard/failure actually fires; a check that cannot fail proves
+nothing, so hand-build the violation, one proof per detection axis; (3) only
+then build. Publish one line per fact in `## Verified before building`:
+`<claim> | <how verified> | <result>`. A PR touching an external system
+without this section is incomplete.
 
-(Every late defect in this factory traced to skipping step 1 or 2 — pnpm's unit
-was minutes-not-days, `npx stryker` was the wrong package, a security field was
-delivered empty. Nothing probed-first ever produced a late surprise.)
+# STEP 1 — search for the shipped solution before designing one
 
-# The bulletproof interrogation (mandatory, self-applied)
+Before designing any mechanism, spend one research pass (web search or a
+deep-research spawn): does the chosen vendor, an adjacent tier, or the
+category's standard practice already ship this? Research is orders of
+magnitude cheaper than a design round — going in a circle is the expensive
+failure, not the search. A found solution converts the task from "build" to
+"adopt + verify". (Measured: one vendor-tier answer deleted a four-round
+scaffolding cluster — `docs/audits/gate-evidence.md`.)
 
-**"Bulletproof" is a GATE, not a summary.** The word may be used only when the
-gap list contains ZERO items testable by you. A testable gap is not a
-disclosure — it is a work queue: test it NOW, without offering, without asking,
-without weighing token cost (cost is the owner's variable — surface it, never
-use it to defer mandated verification). Publishing a gap list and concluding
-anyway is confession as a substitute for correction, and it is forbidden. Only
-gaps untestable by you may remain, and then the only permitted claim is:
-"proven except: <named gaps + who can test them>".
+# The interrogation (self-applied, answers published)
 
-Answer ALL of these about your own work product, in writing, before you call
-it done. Publishing the answers (including the uncomfortable ones) is part of
-the deliverable — a PR or verdict without them is incomplete.
+Answer in writing before any done-claim; a PR or verdict without the answers
+is incomplete. A gap you can test is a work queue, not a disclosure — test
+it now. Cost never waives a mandated check and never curtails the loop —
+compute is not a reason to stop; cost discipline is research-before-rounds
+and model routing, never fewer rounds or skipped verification.
 
-1. **How does this fail?** Concrete failure modes: under load, under malicious
-   input, over time (drift, expiry, dependency rot), at scale, when an
-   upstream API/tool changes.
-2. **What are the gaps?** What did you NOT test or verify? Anything verified
-   only by inspection is NOT proof — execute it or list it as a gap.
-3. **Rival-critique test:** if a competing AI (ChatGPT) were reviewing this
-   work to convince the user to switch away, what would it seize on? Fix that
-   before shipping.
-4. **Symptom or root cause?** If any part of this patches a symptom, say so
-   explicitly and name the root cause.
-5. **Blast radius:** if this is wrong, what downstream code, data, or process
-   breaks?
-6. **Six-month test:** which assumptions rot — versions, names, rate limits,
-   API shapes, magic values?
-7. **Auditor passes:** what would a security auditor flag? What would a cost
-   auditor flag?
-8. **Debt check:** does this add ANY technical debt? Then it is not done — it
-   is deferred work wearing a label. Either fix it or declare it as a finding.
+1. How does this fail? Load, malicious input, drift, scale, upstream change.
+2. What did you NOT verify? Inspection is not proof — execute it or list it.
+3. Rival-critique: what would a competing AI seize on to take this account?
+   For stamp-grade claims this is EXECUTED via the outside pass, not
+   imagined.
+4. Symptom or root cause?
+5. Blast radius: what breaks downstream if this is wrong?
+6. Six-month rot: which assumptions expire?
+7. What would a security auditor flag? A cost auditor?
+8. Any debt added? Fix it or declare it as a finding.
+9. Bar check, BOTH directions: what here sits above the industry floor
+   without serving the differentiator — delete it; and is the differentiator
+   still demonstrably AHEAD of the industry standard — prove it, never
+   assert it.
 
-## Non-negotiables for guards and external systems
+## Fix authoring (measured: ~half of late findings live in fix text)
 
-- **Guard proof:** any guard, limit, or threshold ships only with its FAILURE
-  side demonstrated against a HAND-BUILT violation. Agent-built violations are
-  circular (a working guard prevents the agent from constructing one), and
-  "fails safe by construction" does not cover the silent-no-op case — a guard
-  that never engages looks exactly like success. **Per-axis, never an OR:** a
-  claim covering multiple detection axes (raw AND formatted, element AND MIME
-  reference, transcript AND summary) needs one independent failure proof per
-  axis — one violation carrying every payload yields a single binary verdict
-  that any one axis can satisfy while the others stay unproven.
-- **Alien-system rule:** any external-system behavior this work depends on —
-  units, event semantics, defaults, identity/permission behavior — is probed
-  empirically before building on it. Doc summaries and memory state hypotheses,
-  not facts. (Empirically: every late-found defect in this factory came from an
-  unprobed assumption; nothing probed first ever produced a late surprise.)
+Walk every promise a fix makes to its named gate site (the test file, the
+CI config, the milestone accept) — not just the claim site; residue-grep
+every term you touched; give state-machine fixes the full writers × states ×
+timings cross-product immediately, never one leaked path per round; and
+walk any NEW design content authored mid-loop (fixture, route, field, enum)
+through every definition it touches — patch discipline is not enough for
+design content.
 
-## Fix-pass and iteration discipline (adversarial loops)
+## Stamp-grade claims: the Baseline-anchored gate
 
-Measured across a 30+-round adversarial review program: roughly HALF of all
-late findings lived inside the previous iteration's own fix text. Three rules
-collapse that tail:
+Stamp-grade = anything another agent, workflow, or milestone builds on,
+regardless of label — any doubt resolves to stamp-grade. Policy and record
+format: the consuming repo's `.claude/rules/definition-of-done.md`. Reviewer
+procedure: this plugin's `agents/reviewer.md` (`scalebridge:reviewer`).
 
-1. **Gate-site self-check before handing off:** every fixture, test, or gate
-   your fix PROMISES must verifiably exist at its gate site (the milestone
-   accept, the test file, the CI config) — not just at the claim site where
-   the promise is written. Then residue-grep every term your fix touched;
-   stale echoes of the pre-fix wording survive in cross-references almost
-   every time.
-2. **State-machine fixes get the full cross-product immediately:** if the fix
-   touches writers × states × timings (retries, upgrades, redeliveries),
-   enumerate the whole cross-product NOW — a reviewer's single finding must
-   never set the fix's scope, or the mechanism leaks one path per iteration.
-3. **New design content gets the definitional walk:** a new fixture, route,
-   field, or enum value authored mid-loop must be walked through EVERY
-   definition it touches (vocabularies, tables, schemas, seam contracts)
-   before it lands — patch discipline is not enough for design content.
+1. **Baseline first — researched, then owner-ratified.** Never ask the
+   owner cold: one research pass establishes the sold promises verbatim;
+   the industry-standard floor (how do the category's best ship this?);
+   THE differentiator — the named place this artifact beats the standard;
+   the chosen vendor path/tier (best-in-class named first); explicit v1
+   exclusions. No Baseline, no gate.
+2. **Judgment rounds.** Map-free outside-frame audits against the Baseline:
+   committed reviewer definition, cross-model preferred — vary the FRAME
+   between rounds; same-frame repetition adds nothing (measured worthless
+   at n=49). More rounds are always allowed; more of the same frame is not.
+3. **Decisions — proxy, never park.** DECISION-REQUIRED findings (cheapest
+   resolution is a decision above the artifact: vendor tier, scope, promise
+   change) are DECIDED in-loop by the agent as owner-proxy from the owner's
+   standing philosophy — never half-ass, attack the root cause, operate in
+   good faith, do good business, win first — with the researched options
+   and the ruling logged in the stamp record's Decisions section for owner
+   audit at merge. Interrupt the owner ONLY when truly blocked or dire:
+   irreversible external/legal/financial commitments, real spend, conflict
+   with an explicit owner ruling, or a block only the owner can clear.
+4. **Fix pass.** Every finding, root cause first. ≥3 findings clustering in
+   one subsystem → research that domain's standard BEFORE spec-editing (a
+   cluster is often one vendor decision in disguise).
+5. **Verification pass.** Every fix present at its named gate site, residue
+   clean. A new finding inside a fix loops again — fix it and re-verify.
+6. **LOOP UNTIL GREEN.** Green = a CLEAN pass: zero unresolved findings.
+   Every finding carries a cheapest-resolution tag (`spec-edit | decision |
+   vendor-fact`) and resolves exactly one way — fixed at its gate site ·
+   collapsed by research/vendor adoption (STEP 1, the `vendor-fact` path) ·
+   refuted with independent adjudication · or, if genuinely outside this
+   artifact's scope, converted to an ISSUE-SUGGESTION with the proxy ruling
+   logged.
+   Nothing ships parked, downgraded, or ledger-laundered — green is never
+   redefined downward. No round cap and compute is never a reason to stop:
+   new legit findings in later rounds are the loop WORKING; research exists
+   to prevent the avoidable ones, not to excuse them. Findings that sit
+   above the floor serving no differentiator resolve by DELETION — that too
+   is a fix. Record burn per round and validate the record with the
+   consuming repo's `scripts/validate-stamp.sh`.
 
-## Where the answers go
+## Issue suggestions
 
-- **Implementer:** a `## Bulletproof check` section in the PR body — honest
-  answers, including named gaps.
-- **Gate agents:** fold the relevant answers into your verdict evidence.
-
-## Issue suggestions (out-of-scope findings)
-
-Anything real you noticed that is OUTSIDE your task's scope — a gap, debt,
-missing test, design smell — must NOT be fixed silently (scope discipline)
-and must NOT be dropped. Emit it in the PR body under `## Issue suggestions`,
-one per line:
-
-```
-ISSUE-SUGGESTION: <imperative title> — <root cause / evidence / why it matters>
-```
-
-The human/orchestrator triages every suggestion (right-way / zero-debt / root-cause /
-fits-the-vision) and stages accepted ones as real tasks. Suggest freely; they filter. Never create issues yourself.
+Out-of-scope findings are never fixed silently and never dropped:
+`ISSUE-SUGGESTION: <imperative title> — <evidence / why it matters>` in the
+PR body; the orchestrator triages every suggestion. Never create issues
+yourself.
