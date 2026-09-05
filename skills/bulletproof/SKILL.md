@@ -106,10 +106,12 @@ procedure: this plugin's `agents/reviewer.md` (`scalebridge:reviewer`).
 5. **Verification pass.** Every fix present at its named gate site, residue
    clean. A new finding inside a fix loops again — fix it and re-verify.
 6. **LOOP UNTIL GREEN.** Green = a CLEAN pass: zero unresolved findings.
-   Every finding resolves exactly one way — fixed at its gate site ·
-   collapsed by research/vendor adoption (STEP 1) · refuted with
-   independent adjudication · or, if genuinely outside this artifact's
-   scope, converted to an ISSUE-SUGGESTION with the proxy ruling logged.
+   Every finding carries a cheapest-resolution tag (`spec-edit | decision |
+   vendor-fact`) and resolves exactly one way — fixed at its gate site ·
+   collapsed by research/vendor adoption (STEP 1, the `vendor-fact` path) ·
+   refuted with independent adjudication · or, if genuinely outside this
+   artifact's scope, converted to an ISSUE-SUGGESTION with the proxy ruling
+   logged.
    Nothing ships parked, downgraded, or ledger-laundered — green is never
    redefined downward. No round cap and compute is never a reason to stop:
    new legit findings in later rounds are the loop WORKING; research exists
