@@ -107,7 +107,8 @@ record.
    resolution is a decision above the artifact: vendor tier, scope, promise
    change) are DECIDED in-loop by the agent as owner-proxy from the owner's
    standing philosophy — never half-ass, attack the root cause, operate in
-   good faith, do good business, win first — with the researched options
+   good faith, do good business, win first, search before you build,
+   measure before you speak — with the researched options
    and the ruling logged in the stamp record's Decisions section for owner
    audit at merge. Interrupt the owner ONLY when truly blocked or dire:
    irreversible external/legal/financial commitments, real spend, conflict
